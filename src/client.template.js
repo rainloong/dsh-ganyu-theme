@@ -6,6 +6,7 @@ window.__ModuleLoader__.load({
     Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 
     const React = require("react");
+    const ReactDOM = require("react-dom/client");
     const PLUGIN_ID = "dsh-theme-ganyu";
     const IMAGE = "data:image/webp;base64,__GANYU_IMAGE_BASE64__";
     // Civilization emblem from the Ganyu civ6 mod: a silver ring around a lotus.
@@ -274,8 +275,8 @@ window.__ModuleLoader__.load({
           0 5px 16px rgba(52, 116, 158, 0.08);
         color: #143a56;
         font: inherit;
-        font-size: 12px;
-        line-height: 1.3;
+        font-size: 13.5px;
+        line-height: 1.4;
         text-align: left;
         cursor: pointer;
         user-select: none;
@@ -319,7 +320,7 @@ window.__ModuleLoader__.load({
       }
 
       .ganyu-bill__row--total .ganyu-bill__value {
-        font-size: 13px;
+        font-size: 14.5px;
       }
 
       /* Collapsed = a single row: title, day figure, chevron. */
@@ -334,7 +335,7 @@ window.__ModuleLoader__.load({
       .ganyu-bill__headline {
         margin-left: auto;
         color: #1d5d8f;
-        font-size: 12.5px;
+        font-size: 14px;
         font-weight: 600;
         font-variant-numeric: tabular-nums;
         letter-spacing: 0.01em;
@@ -352,7 +353,7 @@ window.__ModuleLoader__.load({
       .ganyu-bill__chevron {
         flex: none;
         color: #7d9fb4;
-        font-size: 11px;
+        font-size: 13px;
         line-height: 1;
         transition: transform 0.18s ease;
         transform: rotate(-90deg);
@@ -397,7 +398,7 @@ window.__ModuleLoader__.load({
         border: 0.5px solid rgba(48, 104, 143, 0.24);
         background: rgba(255, 255, 255, 0.45);
         color: #4d7085;
-        font-size: 10.5px;
+        font-size: 12px;
         cursor: pointer;
         user-select: none;
         transition: background 0.14s ease, color 0.14s ease;
@@ -443,7 +444,7 @@ window.__ModuleLoader__.load({
         border: 0.5px solid rgba(48, 104, 143, 0.28);
         background: rgba(255, 255, 255, 0.55);
         color: #4d7085;
-        font-size: 10.5px;
+        font-size: 12px;
         line-height: 1.5;
         cursor: pointer;
         user-select: none;
@@ -487,7 +488,7 @@ window.__ModuleLoader__.load({
       .ganyu-token-cols {
         padding: 2px 0 3px;
         color: #7d9fb4;
-        font-size: 10px;
+        font-size: 11.5px;
         letter-spacing: 0.06em;
       }
 
@@ -503,7 +504,7 @@ window.__ModuleLoader__.load({
 
       .ganyu-token-item {
         padding: 1px 0;
-        font-size: 11.5px;
+        font-size: 13px;
         line-height: 1.45;
       }
 
@@ -530,7 +531,7 @@ window.__ModuleLoader__.load({
       .ganyu-token-more {
         padding: 2px 0;
         color: #7d9fb4;
-        font-size: 11px;
+        font-size: 12.5px;
       }
 
       .ganyu-bill__head {
@@ -593,7 +594,7 @@ window.__ModuleLoader__.load({
 
       .ganyu-bill__label {
         color: #66899f;
-        font-size: 11px;
+        font-size: 12.5px;
       }
 
       .ganyu-bill__value {
@@ -810,6 +811,653 @@ window.__ModuleLoader__.load({
         [class*="sessionRow"][class*="selected"]:hover {
           transform: none;
         }
+      }
+
+      /* ---- 凝霜书签 (bookmark shelf) ---------------------------------------
+         A header button that keeps file PATHS. The shelf floats over the
+         conversation so the header row keeps its height. */
+      .ganyu-mark {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .ganyu-mark__trigger {
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        height: 28px;
+        padding: 0 11px;
+        border: 0.5px solid rgba(120, 186, 230, 0.42);
+        border-radius: 9px;
+        background: linear-gradient(148deg, rgba(255, 255, 255, 0.62), rgba(190, 228, 252, 0.34));
+        color: #1d5d8f;
+        font: inherit;
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      }
+
+      .ganyu-mark__trigger:hover,
+      .ganyu-mark__trigger--on {
+        background: linear-gradient(148deg, rgba(255, 255, 255, 0.86), rgba(174, 222, 251, 0.52));
+        border-color: rgba(96, 170, 220, 0.68);
+        color: #12496e;
+      }
+
+      .ganyu-mark__trigger:focus-visible {
+        outline: 2px solid rgba(98, 180, 236, 0.72);
+        outline-offset: 2px;
+      }
+
+      .ganyu-mark__label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .ganyu-mark__glyph {
+        font-size: 12px;
+        color: #4b9ad4;
+      }
+
+      .ganyu-mark__count {
+        min-width: 15px;
+        height: 15px;
+        padding: 0 4px;
+        border-radius: 999px;
+        background: #3f86c4;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 15px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ❄ on a presented-file card in the conversation.
+         The card is a flex row: [body ...][actions]. The ❄ is injected as a
+         SIBLING just before the card's own action group, so it lines up to the
+         LEFT of "open" instead of floating over it. No absolute positioning,
+         hence no chance of covering the card's own controls. */
+      .ganyu-card-mark {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        height: 26px;
+        padding: 0 10px;
+        margin-right: 6px;
+        border: 0.5px solid rgba(96, 170, 220, 0.46);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #3f86c4;
+        font-family: inherit;
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+        /* Always visible: hiding it left a gap on the card's right side AND made
+           its own hit area unreliable (it was pointer-events:none until hover,
+           so the first click could land on the card instead). */
+        opacity: 1;
+        pointer-events: auto;
+        /* The card's preview button is an absolutely-positioned overlay covering
+           the whole card (inset: 0). Without a stacking context of its own the ❄
+           sits UNDER it and never receives a click, which is why pressing did
+           nothing. Lift it above that overlay. */
+        position: relative;
+        z-index: 3;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          color 0.15s ease,
+          transform 110ms cubic-bezier(.4, 0, .2, 1),
+          box-shadow 0.15s ease;
+      }
+
+      .ganyu-card-mark:hover {
+        background: rgba(98, 180, 236, 0.24);
+        border-color: rgba(63, 134, 196, 0.62);
+        color: #12496e;
+      }
+
+      /* Pressed state must beat the hover rule, hence the explicit order. */
+      .ganyu-card-mark:active,
+      .ganyu-card-mark.ganyu-card-mark--done:active {
+        transform: scale(0.92);
+        background: rgba(98, 180, 236, 0.34);
+        box-shadow: inset 0 1px 4px rgba(28, 78, 112, 0.28);
+      }
+
+      .ganyu-card-mark:focus-visible {
+        outline: 2px solid rgba(98, 180, 236, 0.72);
+        outline-offset: 1px;
+      }
+
+      /* The ❄ glyph itself ticks when the bookmark lands. */
+      .ganyu-card-mark__label {
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .ganyu-card-mark__glyph {
+        display: inline-block;
+        font-size: 12px;
+      }
+
+      .ganyu-card-mark--done .ganyu-card-mark__glyph {
+        animation: ganyu-card-tick 480ms cubic-bezier(.34, 1.56, .64, 1);
+      }
+
+      /* Variants for the three places a file can appear. */
+      .ganyu-card-mark--image {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        z-index: 3;
+        height: 24px;
+        padding: 0 8px;
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 2px 8px rgba(38, 96, 138, 0.18);
+      }
+
+      .ganyu-card-mark--attachment {
+        margin-left: 6px;
+        height: 24px;
+        padding: 0 8px;
+        min-width: 62px;
+        justify-content: center;
+        font-size: 11px;
+      }
+
+      /* An inline ❄ after a markdown file link: compact, no pill chrome. */
+      .ganyu-card-mark--link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0;
+        margin-left: 3px;
+        vertical-align: middle;
+        border-radius: 5px;
+        border: 0.5px solid rgba(96, 170, 220, 0.4);
+        background: rgba(255, 255, 255, 0.7);
+        font-size: 10px;
+        line-height: 1;
+      }
+
+      .ganyu-card-mark--link .ganyu-card-mark__label {
+        display: none;
+      }
+
+      /* Image + its ❄ form one inline unit, so the pill sits beside the picture
+         instead of drifting to the end of the row. */
+      /* "已收" must beat every variant background.
+         The earlier rule was defined BEFORE .--image / .--attachment / .--link,
+         so an equal-specificity later rule (the white variant fill) overrode it
+         and a kept bookmark looked plain white. This block sits after all of
+         them and is doubly qualified for good measure. */
+      .ganyu-card-mark.ganyu-card-mark--done,
+      .ganyu-card-mark--image.ganyu-card-mark--done,
+      .ganyu-card-mark--attachment.ganyu-card-mark--done,
+      .ganyu-card-mark--link.ganyu-card-mark--done,
+      .ganyu-img-wrap > .ganyu-card-mark--done {
+        background: linear-gradient(180deg, #4a95d2, #35729f);
+        border-color: transparent;
+        color: #ffffff;
+        box-shadow: 0 1px 4px rgba(38, 96, 138, 0.28);
+      }
+
+      .ganyu-card-mark.ganyu-card-mark--done:hover,
+      .ganyu-card-mark--image.ganyu-card-mark--done:hover,
+      .ganyu-card-mark--attachment.ganyu-card-mark--done:hover,
+      .ganyu-card-mark--link.ganyu-card-mark--done:hover {
+        background: linear-gradient(180deg, #3f86c4, #2c6289);
+        border-color: transparent;
+        color: #ffffff;
+      }
+
+      .ganyu-card-mark--done .ganyu-card-mark__glyph {
+        color: #e8f5ff;
+      }
+
+      /* The picture and its ❄ are one block-level unit.
+         An inline-flex wrapper stretched to the row's full height, which is
+         why a wide picture showed an empty clickable band to its right before
+         the pill. A block wrapper sized by the picture itself removes that band. */
+      .ganyu-img-wrap {
+        /* Shrink to the picture. Without an explicit fit-content width the
+           inline-block accepts the row's full width, so a wide picture left a
+           dead strip to its right and the pill sat at the far edge of that
+           strip instead of next to the image. */
+        display: inline-block;
+        /* Width/height are written inline from the measured bitmap box; this is
+           only the pre-measure fallback. */
+        width: fit-content;
+        max-width: 100%;
+        position: relative;
+        vertical-align: top;
+        line-height: 0;
+        overflow: visible;
+      }
+
+      .ganyu-img-wrap > img,
+      .ganyu-img-wrap > button,
+      .ganyu-img-wrap > a {
+        display: block;
+        max-width: 100%;
+      }
+
+      /* Just OUTSIDE the picture's top-right corner.
+         This used to leave a gap because the wrapper's width was whatever the
+         message row gave it. The wrapper is now pinned to the measured bitmap box,
+         so a left:100% offset lands exactly on the picture's right edge.
+         The pill is a sibling of the zoom button, never a child, so clicking it
+         cannot open the lightbox. */
+      .ganyu-img-wrap > .ganyu-card-mark--image {
+        position: absolute;
+        top: 6px;
+        left: 100%;
+        margin-left: 6px;
+        z-index: 3;
+        min-width: 62px;
+        justify-content: center;
+        flex: none;
+      }
+
+      .ganyu-img-wrap:hover > .ganyu-card-mark--image {
+        background: rgba(98, 180, 236, 0.24);
+      }
+
+      .ganyu-mark__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 0 0 8px;
+      }
+
+      .ganyu-mark__chip {
+        flex: none;
+        padding: 2px 9px;
+        border-radius: 999px;
+        border: 0.5px solid rgba(48, 104, 143, 0.26);
+        background: rgba(255, 255, 255, 0.52);
+        color: #4d7085;
+        font-size: 11.5px;
+        line-height: 1.6;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .ganyu-mark__chip:hover {
+        background: rgba(98, 180, 236, 0.16);
+        color: #1d5d8f;
+      }
+
+      .ganyu-mark__chip--on {
+        background: linear-gradient(180deg, #4a95d2, #35729f);
+        border-color: transparent;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .ganyu-mark__row2 {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .ganyu-mark__row2 > .ganyu-mark__input {
+        flex: 1 1 0;
+        min-width: 60px;
+      }
+
+      .ganyu-mark__select,
+      .ganyu-mark__move {
+        box-sizing: border-box;
+        height: 30px;
+        padding: 0 6px;
+        border: 0.5px solid rgba(48, 104, 143, 0.34);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.94);
+        color: #143a56;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .ganyu-mark__move {
+        height: 23px;
+        font-size: 10.5px;
+        max-width: 84px;
+      }
+
+      .ganyu-mark__ghost {
+        flex: none;
+        height: 30px;
+        padding: 0 10px;
+        white-space: nowrap;
+        border: 0.5px solid rgba(48, 104, 143, 0.34);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.7);
+        color: #1d5d8f;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .ganyu-mark__ghost:hover {
+        background: rgba(98, 180, 236, 0.18);
+        border-color: rgba(63, 134, 196, 0.5);
+      }
+
+      .ganyu-mark__groups {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 8px;
+      }
+
+      .ganyu-mark__grouphead {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 2px 4px;
+      }
+
+      .ganyu-mark__groupname {
+        color: #12496e;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .ganyu-mark__groupcount {
+        min-width: 14px;
+        height: 14px;
+        padding: 0 4px;
+        border-radius: 999px;
+        background: rgba(98, 180, 236, 0.22);
+        color: #1d5d8f;
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 14px;
+        text-align: center;
+      }
+
+      .ganyu-mark__groupdel {
+        margin-left: auto;
+        width: 18px;
+        height: 18px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #a8bcc9;
+        font-size: 12px;
+        line-height: 18px;
+        cursor: pointer;
+      }
+
+      .ganyu-mark__groupdel:hover {
+        background: rgba(212, 81, 97, 0.14);
+        color: #a83a4c;
+      }
+
+      .ganyu-mark__groupempty {
+        padding: 2px 4px 4px;
+        color: #a8bcc9;
+        font-size: 11.5px;
+      }
+
+      .ganyu-mark__panel {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 60;
+        width: 360px;
+        max-width: calc(100vw - 32px);
+        max-height: 420px;
+        overflow-y: auto;
+        padding: 12px;
+        border: 0.5px solid rgba(255, 255, 255, 0.78);
+        border-radius: 14px;
+        background: linear-gradient(160deg, rgba(250, 254, 255, 0.97), rgba(226, 245, 255, 0.95));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 12px 38px rgba(44, 108, 152, 0.20);
+        color: #143a56;
+        font-size: 12.5px;
+        text-align: left;
+        cursor: default;
+      }
+
+      .ganyu-mark__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .ganyu-mark__title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #12496e;
+        letter-spacing: 0.02em;
+      }
+
+      .ganyu-mark__hint {
+        color: #7d9fb4;
+        font-size: 11px;
+      }
+
+      .ganyu-mark__form {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-bottom: 10px;
+        border-bottom: 0.5px solid rgba(48, 104, 143, 0.20);
+      }
+
+      .ganyu-mark__input {
+        box-sizing: border-box;
+        width: 100%;
+        height: 30px;
+        padding: 0 9px;
+        border: 0.5px solid rgba(48, 104, 143, 0.34);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.94);
+        color: #143a56;
+        font: inherit;
+        font-size: 12.5px;
+      }
+
+      .ganyu-mark__input::placeholder {
+        color: #9ab4c6;
+      }
+
+      .ganyu-mark__input:focus {
+        outline: none;
+        border-color: #3f86c4;
+        box-shadow: 0 0 0 2px rgba(98, 180, 236, 0.22);
+      }
+
+      .ganyu-mark__add {
+        flex: none;
+        align-self: flex-end;
+        height: 30px;
+        padding: 0 14px;
+        white-space: nowrap;
+        border: 0;
+        border-radius: 9px;
+        background: linear-gradient(180deg, #4a95d2, #35729f);
+        color: #fff;
+        font: inherit;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .ganyu-mark__add:hover {
+        background: linear-gradient(180deg, #59a3dc, #3d7daa);
+      }
+
+      .ganyu-mark__notice {
+        margin-top: 8px;
+        padding: 5px 8px;
+        border-radius: 8px;
+        background: rgba(98, 180, 236, 0.16);
+        color: #1d5d8f;
+        font-size: 11.5px;
+      }
+
+      .ganyu-mark__empty {
+        padding: 14px 2px 6px;
+        color: #7d9fb4;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .ganyu-mark__list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-top: 8px;
+      }
+
+      .ganyu-mark__item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 8px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.62);
+        border: 0.5px solid rgba(48, 104, 143, 0.14);
+      }
+
+      .ganyu-mark__item:hover {
+        background: rgba(255, 255, 255, 0.88);
+        border-color: rgba(96, 170, 220, 0.44);
+      }
+
+      .ganyu-mark__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .ganyu-mark__name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #12496e;
+        font-size: 12.5px;
+        font-weight: 600;
+      }
+
+      .ganyu-mark__from {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #8aa7b9;
+        font-size: 10.5px;
+        font-style: italic;
+      }
+
+      .ganyu-mark__pathrow {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .ganyu-mark__pathrow .ganyu-mark__time {
+        flex: none;
+        margin-left: auto;
+      }
+
+      .ganyu-mark__path {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #7d9fb4;
+        font-size: 10.5px;
+      }
+
+      .ganyu-mark__time {
+        color: #9ab4c6;
+        font-size: 10px;
+      }
+
+      .ganyu-mark__acts {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        flex: none;
+      }
+
+      .ganyu-mark__act {
+        height: 23px;
+        padding: 0 7px;
+        border: 0.5px solid rgba(48, 104, 143, 0.28);
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.7);
+        color: #1d5d8f;
+        font: inherit;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .ganyu-mark__act:hover {
+        background: rgba(98, 180, 236, 0.20);
+        border-color: rgba(63, 134, 196, 0.55);
+        color: #12496e;
+      }
+
+      /* The 打开 button needs a felt press of its own: it is the main action and
+         a miss here reads as "the click did nothing". */
+      .ganyu-mark__act:active {
+        transform: scale(0.90);
+        background: rgba(74, 149, 210, 0.30);
+        box-shadow: inset 0 1px 4px rgba(28, 78, 112, 0.28);
+      }
+
+      .ganyu-mark__act--busy {
+        opacity: 0.65;
+        cursor: progress;
+      }
+
+      .ganyu-mark__act--fix {
+        color: #b0631f;
+        border-color: rgba(196, 122, 46, 0.44);
+      }
+
+      .ganyu-mark__act--fix:hover {
+        background: rgba(224, 148, 62, 0.16);
+        border-color: rgba(176, 99, 31, 0.6);
+        color: #8a4a10;
+      }
+
+      .ganyu-mark__act--danger {
+        color: #a83a4c;
+      }
+
+      .ganyu-mark__act--danger:hover {
+        background: rgba(212, 81, 97, 0.14);
+        border-color: rgba(179, 56, 74, 0.42);
+        color: #8f2436;
       }
 
       /* Small Settings icon inside the account row, right of the name/phone. */
@@ -1187,39 +1835,6 @@ window.__ModuleLoader__.load({
       return { currency, total, bonus: bonusTotal, recharge: Math.max(0, total - bonusTotal) };
     }
 
-    /** Price one session's durable provider usage with the official CNY table. */
-    /**
-     * Price one session's day usage with the official CNY table.
-     *
-     * `day` carries the buckets already narrowed to today, so a conversation
-     * that started last week is charged only for what it used today.
-     *
-     * @param item - the session summary (for its model route).
-     * @param day - today's summed buckets for that session.
-     * @param at - a timestamp inside the billed window, used to pick peak/off-peak.
-     */
-    function sessionCostFromUsage(item, day, at) {
-      if (!day) return 0;
-      const selection = item?.projections?.values?.modelSelection;
-      const model = selection?.lastUsed?.model || selection?.next?.model || "";
-      const tariff = /pro/i.test(model) ? CNY_TARIFFS.pro : CNY_TARIFFS.flash;
-      const bucket = isPeak(new Date(at)) ? 1 : 0;
-      const cacheRead = positiveNumber(day.cacheRead) / 1e6 * tariff.cacheHit[bucket];
-      const cacheMiss = (positiveNumber(day.cacheMiss) + positiveNumber(day.cacheWrite)) / 1e6 * tariff.cacheMiss[bucket];
-      const output = positiveNumber(day.output) / 1e6 * tariff.output[bucket];
-      return cacheRead + cacheMiss + output;
-    }
-
-    /** Sum the sessions touched today; the estimate follows each session's last activity time. */
-    function todayCost(items) {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const startMs = start.getTime();
-      return items
-        .filter((item) => Number(item.updatedAt) >= startMs)
-        .reduce((sum, item) => sum + sessionCost(item), 0);
-    }
-
     /**
      * Per-session token ledger for today.
      *
@@ -1291,12 +1906,35 @@ window.__ModuleLoader__.load({
      * @param dayStart - local midnight in epoch ms.
      * @returns summed buckets for that session today.
      */
+    /**
+     * Price a single usage record at the model that was active when it happened
+     * and the peak/off-peak bucket of its own timestamp. `modelName` comes from
+     * the last `model/selection` event seen before this message.
+     *
+     * Free-tier / promotional models (`*-free`, `*:free`) are billed at zero —
+     * they run on granted quota rather than the paid CNY table.
+     */
+    function priceUsage(usage, modelName, timestamp) {
+      const model = String(modelName || "");
+      if (/free|promo/i.test(model)) return 0;
+      const tariff = /pro/i.test(model) ? CNY_TARIFFS.pro : CNY_TARIFFS.flash;
+      const bucket = isPeak(new Date(timestamp)) ? 1 : 0;
+      const cacheRead = positiveNumber(usage.cacheReadTokens) / 1e6 * tariff.cacheHit[bucket];
+      const cacheMiss = (positiveNumber(usage.inputTokens) + positiveNumber(usage.cacheWriteTokens)) / 1e6 * tariff.cacheMiss[bucket];
+      const output = positiveNumber(usage.outputTokens) / 1e6 * tariff.output[bucket];
+      return cacheRead + cacheMiss + output;
+    }
+
+    /**
+     * Read one session's events for today, returning BOTH the token buckets and
+     * an exact cost. `session/page` pages backwards, so pages are collected in
+     * order, then replayed from oldest to newest: `model/selection` events set
+     * the active model for every later `assistant/message`, which lets a
+     * conversation that switched models mid-day be priced correctly.
+     */
     async function readSessionDayUsage(session, sessionId, dayStart) {
-      const out = { cacheRead: 0, cacheMiss: 0, cacheWrite: 0, output: 0 };
-      // `session/page` walks backwards and takes an EXCLUSIVE `beforeSeq`:
-      // the next page must start at this page's oldest record seq. The returned
-      // `cursor` is the observed log end, not a paging cursor, so it is useless
-      // for continuation — using it re-reads the newest window forever.
+      const out = { cacheRead: 0, cacheMiss: 0, cacheWrite: 0, output: 0, cost: 0 };
+      const collected = [];
       let beforeSeq;
       for (let guard = 0; guard < 400; guard += 1) {
         let page;
@@ -1322,26 +1960,39 @@ window.__ModuleLoader__.load({
           const at = Number(event.time) || 0;
           if (Number.isFinite(seq) && seq < oldestSeq) oldestSeq = seq;
           if (at < oldestTime) oldestTime = at;
-          if (at < dayStart) continue;
-          if (event.type !== "assistant/message") continue;
-          const usage = event.data?.usage;
-          if (usage === undefined || usage === null) continue;
-          // Event payloads name the uncached input `inputTokens`; the
-          // `uncachedInputTokens` spelling belongs to the session/list projection,
-          // so reading it here always yielded 0.
-          out.cacheRead += positiveNumber(usage.cacheReadTokens);
-          out.cacheMiss += positiveNumber(usage.inputTokens);
-          out.cacheWrite += positiveNumber(usage.cacheWriteTokens);
-          out.output += positiveNumber(usage.outputTokens);
+          if (at < dayStart) {
+            // This is the boundary event just before today. Keep its model
+            // declaration if present: a conversation started yesterday under a
+            // free tier and simply continued today still needs that initial
+            // model for correct pricing. Do NOT keep its usage.
+            if (event.type === "model/selection") collected.push(event);
+            continue;
+          }
+          collected.push(event);
         }
-
-        // The page reached yesterday: every event after it is already counted.
         if (oldestTime < dayStart) break;
-        // Nothing older exists.
         if (page.value?.hasMore !== true) break;
         if (!Number.isFinite(oldestSeq) || oldestSeq <= 0) break;
         if (oldestSeq === beforeSeq) break;
         beforeSeq = oldestSeq;
+      }
+
+      // Replay oldest → newest so model switches apply to later messages.
+      collected.sort((left, right) => (Number(left.seq) || 0) - (Number(right.seq) || 0));
+      let model = "";
+      for (const event of collected) {
+        if (event.type === "model/selection") {
+          model = String(event.data?.model || "");
+          continue;
+        }
+        if (event.type !== "assistant/message") continue;
+        const usage = event.data?.usage;
+        if (usage === undefined || usage === null) continue;
+        out.cacheRead += positiveNumber(usage.cacheReadTokens);
+        out.cacheMiss += positiveNumber(usage.inputTokens);
+        out.cacheWrite += positiveNumber(usage.cacheWriteTokens);
+        out.output += positiveNumber(usage.outputTokens);
+        out.cost += priceUsage(usage, model, Number(event.time) || Date.now());
       }
       return out;
     }
@@ -1421,7 +2072,7 @@ window.__ModuleLoader__.load({
                   return {
                     id: entry.item.sessionId,
                     title: title === "" ? "未命名对话" : title,
-                    cost: sessionCostFromUsage(entry.item, entry.day, dayStart)
+                    cost: positiveNumber(entry.day?.cost)
                   };
                 })
                 .filter((entry) => entry.cost > 0)
@@ -1921,6 +2572,1808 @@ window.__ModuleLoader__.load({
       };
     }
 
+    /* ---------------------------------------------------------------------
+     * 凝霜书签 — a small bookmark shelf for file paths the user wants to keep.
+     *
+     * Storage is localStorage only: a list of { path, label, at }. Nothing is
+     * copied; a bookmark is just the path, so the file keeps living where it
+     * was produced. Opening goes through the host's `openWorkspacePath`, the
+     * same route the shell's own "Open in..." uses.
+     * ------------------------------------------------------------------- */
+    /* 雪泥鸿爪 — bookmarks of file paths, grouped by a user-chosen folder name.
+       Data shape: { "groups": [{ "name": string, "at": number }],
+                     "marks":  [{ "path", "label", "group", "at" }] }
+       Everything lives in localStorage; no file is ever copied. */
+    const MARK_KEY = "dsh-theme-ganyu/marks-v2";
+    const DEFAULT_GROUP = "未分组";
+
+    function normalizeMarks(raw) {
+      if (raw === null || typeof raw !== "object") return { groups: [], marks: [] };
+      const groups = Array.isArray(raw.groups)
+        ? raw.groups
+            .filter((g) => g !== null && typeof g === "object" && typeof g.name === "string" && g.name !== "")
+            .map((g) => ({ name: g.name, at: Number(g.at) || 0 }))
+        : [];
+      const marks = Array.isArray(raw.marks)
+        ? raw.marks
+            .filter((m) => m !== null && typeof m === "object" && typeof m.path === "string")
+            .map((m) => ({
+              path: m.path,
+              label: typeof m.label === "string" && m.label !== "" ? m.label : basenameOf(m.path),
+              group: typeof m.group === "string" && m.group !== "" ? m.group : DEFAULT_GROUP,
+              at: Number(m.at) || 0,
+              from: typeof m.from === "string" ? m.from : ""
+            }))
+        : [];
+      return { groups, marks };
+    }
+
+    // Parsed-store memo. Keyed on the raw string, so any external write (another
+    // tab, DevTools) invalidates it automatically.
+    let marksCacheRaw = null;
+    let marksCacheValue = { groups: [], marks: [] };
+
+    function readMarks() {
+      try {
+        const text = window.localStorage.getItem(MARK_KEY);
+        if (text === marksCacheRaw) return marksCacheValue;
+        marksCacheRaw = text;
+        marksCacheValue = normalizeMarks(text === null ? null : JSON.parse(text));
+        return marksCacheValue;
+      } catch {
+        return { groups: [], marks: [] };
+      }
+    }
+
+    function writeMarks(data) {
+      try {
+        const text = JSON.stringify(data);
+        window.localStorage.setItem(MARK_KEY, text);
+        marksCacheRaw = text;
+        marksCacheValue = data;
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    /** Every group name in use, default group last. */
+    function groupNames(data) {
+      const names = [];
+      for (const group of data.groups) if (!names.includes(group.name)) names.push(group.name);
+      for (const mark of data.marks) if (!names.includes(mark.group)) names.push(mark.group);
+      return names;
+    }
+
+    /** Last path segment, used when the user does not type a label. */
+    function basenameOf(path) {
+      const trimmed = String(path || "").replace(/[\\/]+$/, "");
+      const cut = Math.max(trimmed.lastIndexOf("/"), trimmed.lastIndexOf("\\"));
+      const name = cut >= 0 ? trimmed.slice(cut + 1) : trimmed;
+      return name === "" ? trimmed : name;
+    }
+
+    /**
+     * Current conversation title, read from the session header the shell renders.
+     * Used only as a label on a bookmark ("came from this conversation"), so a
+     * miss simply leaves it blank rather than breaking anything.
+     */
+    // Cached for a short window: this runs on every collect and used to call
+    // `innerText`, which forces a synchronous layout of the whole header.
+    let titleCache = { at: 0, value: "" };
+    const TITLE_TTL_MS = 2000;
+
+    function currentConversationTitle() {
+      const now = Date.now();
+      if (now - titleCache.at < TITLE_TTL_MS) return titleCache.value;
+
+      let value = "";
+      try {
+        const header = document.querySelector('[data-slot="conversation.session.header"]');
+        // textContent instead of innerText: no forced layout.
+        const raw = (header?.textContent || "").split(String.fromCharCode(10));
+        for (const chunk of raw) {
+          const text = chunk.trim();
+          if (text !== "") {
+            value = text.slice(0, 80);
+            break;
+          }
+        }
+        if (value === "") {
+          const node = document.querySelector("[class*='crumb']:not([class*='Sep'])");
+          const text = (node?.textContent || "").trim();
+          if (text !== "") value = text.slice(0, 80);
+        }
+      } catch {
+        value = "";
+      }
+
+      titleCache = { at: now, value };
+      return value;
+    }
+
+    /** Coarse "x 分钟前 / x 天前" for the shelf rows. */
+    function relativeTime(at) {
+      if (!at) return "";
+      const diff = Date.now() - at;
+      const min = Math.floor(diff / 60000);
+      if (min < 1) return "刚刚";
+      if (min < 60) return `${min} 分钟前`;
+      const hour = Math.floor(min / 60);
+      if (hour < 24) return `${hour} 小时前`;
+      const day = Math.floor(hour / 24);
+      if (day < 30) return `${day} 天前`;
+      const date = new Date(at);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    /**
+     * 雪泥鸿爪 — the header button plus its shelf.
+     *
+     * Grouping is manual: the user names a group and files are filed into it.
+     * A group with no files still exists (it is kept in `groups`), so an empty
+     * group does not vanish the moment its last file is removed.
+     */
+    function createMarkShelf(services) {
+      const { session, holder } = services;
+      // `holder` is a mutable box owned by apply(): the sidebar and sessions
+      // services settle asynchronously, so they are read from the box at click
+      // time. Destructuring them here would freeze them at undefined.
+      const live = () => holder ?? {};
+      const getSidebar = () => live().sidebarRight;
+      const getSessions = () => live().sessions;
+
+      /** DSH resource address for a workspace file, as the shell builds it. */
+      const fileAddress = (sessionId, path) => {
+        const normalized = String(path).replace(/\\/g, "/").replace(/^(?:\.\/)+/, "");
+        const encodeSegment = (segment) => encodeURIComponent(segment).replace(/%3A/gi, ":");
+        const encoded = normalized.split("/").map(encodeSegment).join("/");
+        return `dsh-resource://file/session/${encodeSegment(sessionId)}/${encoded}`;
+      };
+
+      return function GanyuMarks() {
+        const [open, setOpen] = React.useState(false);
+        const [data, setData] = React.useState(() => readMarks());
+        const [path, setPath] = React.useState("");
+        const [label, setLabel] = React.useState("");
+        const [group, setGroup] = React.useState(DEFAULT_GROUP);
+        const [newGroup, setNewGroup] = React.useState("");
+        const [filter, setFilter] = React.useState(""); // "" = all groups
+        const [notice, setNotice] = React.useState("");
+        // One-shot flags for the two "this just happened" animations.
+        const [popped, setPopped] = React.useState(false);
+        const [freshPath, setFreshPath] = React.useState("");
+        const rootRef = React.useRef(null);
+
+        // The sidebar API is keyed by session; take the active one from the
+        // sessions store at render time (falls back to empty when unknown).
+        /**
+         * Active session id. `sessions` exposes it under different shapes
+         * depending on the build, so try each instead of trusting one.
+         */
+        const resolveSessionId = () => {
+          const snap = (() => {
+            try {
+              const store = getSessions();
+              return store?.list?.getSnapshot?.() ?? store?.getSnapshot?.();
+            } catch {
+              return undefined;
+            }
+          })();
+          const direct = snap?.mainSessionId ?? snap?.currentSessionId ?? snap?.activeSessionId;
+          if (typeof direct === "string" && direct !== "") return direct;
+          // Fall back to the DOM: the shell tags the active conversation.
+          try {
+            const node = document.querySelector("[data-sidebar-right-session]");
+            const id = node?.getAttribute("data-sidebar-right-session");
+            if (typeof id === "string" && id !== "") return id;
+          } catch {
+            /* ignore */
+          }
+          return "";
+        };
+
+
+        const commit = (next) => {
+          if (!writeMarks(next)) {
+            setNotice("存不进去（本地存储被禁用？）");
+            return false;
+          }
+          setData(next);
+          // Tell every presented-file card to re-read the store, so a card shows
+          // "已收" for as long as the bookmark exists — not for a timer's worth.
+          window.dispatchEvent(new CustomEvent("ganyu:marks-changed"));
+          return true;
+        };
+
+        const flash = (text) => {
+          setNotice(text);
+          window.setTimeout(() => setNotice(""), 2200);
+        };
+
+        /** Fire the "added" animations once, then clear the flags. */
+        const celebrate = (path) => {
+          setPopped(true);
+          setFreshPath(path);
+          window.setTimeout(() => setPopped(false), 460);
+          window.setTimeout(() => setFreshPath(""), 460);
+        };
+
+        // Outside click / Escape closes; the shelf is not a modal.
+        React.useEffect(() => {
+          if (!open) return;
+          const onDown = (event) => {
+            if (rootRef.current !== null && !rootRef.current.contains(event.target)) setOpen(false);
+          };
+          const onKey = (event) => {
+            if (event.key === "Escape") setOpen(false);
+          };
+          document.addEventListener("pointerdown", onDown, true);
+          document.addEventListener("keydown", onKey, true);
+          return () => {
+            document.removeEventListener("pointerdown", onDown, true);
+            document.removeEventListener("keydown", onKey, true);
+          };
+        }, [open]);
+
+        // A file card in the conversation can post a bookmark request without
+        // opening the shelf; the shelf is the single writer of the store.
+        React.useEffect(() => {
+          const onRequest = async (event) => {
+            const detail = event?.detail;
+            if (detail === null || typeof detail !== "object" || typeof detail.path !== "string") return;
+            // An attached file gives only a name; resolve it to a real path first.
+            const target = detail.nameOnly === true ? await resolveAttachment(detail.path) : detail.path;
+            const current = readMarks();
+            if (current.marks.some((mark) => mark.path === target)) {
+              flash("这个路径已经记下了");
+              return;
+            }
+            const entryGroup = typeof detail.group === "string" && detail.group !== "" ? detail.group : DEFAULT_GROUP;
+            const next = {
+              groups: current.groups.some((g) => g.name === entryGroup)
+                ? current.groups
+                : [{ name: entryGroup, at: Date.now() }, ...current.groups],
+              marks: [{
+                path: target,
+                label: basenameOf(target),
+                group: entryGroup,
+                at: Date.now(),
+                from: typeof detail.from === "string" ? detail.from : currentConversationTitle()
+              }, ...current.marks]
+            };
+            if (commit(next)) {
+              flash("已收入雪泥鸿爪");
+              celebrate(target);
+            }
+          };
+          /**
+           * A file the user attached carries only a NAME, not a path. Resolve it
+           * against the session's cwd before storing, so the bookmark still
+           * opens; if resolution fails, store the name and say so.
+           */
+          const resolveAttachment = async (name) => {
+            try {
+              const stat = await session.stat?.({ path: name });
+              const absolute = stat?.ok ? stat.value?.absolutePath : undefined;
+              if (typeof absolute === "string" && absolute !== "") return absolute;
+            } catch {
+              /* fall through */
+            }
+            try {
+              const result = await session.workspaceFiles?.stat?.(undefined, name);
+              const absolute = result?.ok ? result.value?.absolutePath : undefined;
+              if (typeof absolute === "string" && absolute !== "") return absolute;
+            } catch {
+              /* fall through */
+            }
+            return name;
+          };
+
+          // Toggle-off from a card: remove the bookmark by path.
+          const onUnmark = (event) => {
+            const target = event?.detail?.path;
+            if (typeof target !== "string" || target === "") return;
+            const current = readMarks();
+            if (!current.marks.some((mark) => mark.path === target)) return;
+            const next = {
+              groups: current.groups,
+              marks: current.marks.filter((mark) => mark.path !== target)
+            };
+            if (commit(next)) flash("已从雪泥鸿爪取下");
+          };
+
+          // Reload local state whenever anyone writes the store, so a bookmark
+          // made from a file card shows up in the shelf immediately.
+          const onChangedOutside = () => {
+            setData(readMarks());
+          };
+
+          window.addEventListener("ganyu:mark", onRequest);
+          window.addEventListener("ganyu:unmark", onUnmark);
+          window.addEventListener("ganyu:marks-changed", onChangedOutside);
+          window.addEventListener("storage", onChangedOutside);
+          return () => {
+            window.removeEventListener("ganyu:mark", onRequest);
+            window.removeEventListener("ganyu:unmark", onUnmark);
+            window.removeEventListener("ganyu:marks-changed", onChangedOutside);
+            window.removeEventListener("storage", onChangedOutside);
+          };
+        }, []);
+
+        const addMark = () => {
+          const target = path.trim();
+          if (target === "") {
+            flash("先填一个文件路径");
+            return;
+          }
+          if (data.marks.some((mark) => mark.path === target)) {
+            flash("这个路径已经记下了");
+            return;
+          }
+          const next = {
+            groups: data.groups.some((g) => g.name === group)
+              ? data.groups
+              : [{ name: group, at: Date.now() }, ...data.groups],
+            marks: [
+              {
+                path: target,
+                label: label.trim() === "" ? basenameOf(target) : label.trim(),
+                group,
+                at: Date.now(),
+                from: currentConversationTitle()
+              },
+              ...data.marks
+            ]
+          };
+          if (commit(next)) {
+            setPath("");
+            setLabel("");
+            flash("已收入雪泥鸿爪");
+            celebrate(target);
+          }
+        };
+
+        const addGroup = () => {
+          const name = newGroup.trim();
+          if (name === "") return;
+          if (groupNames(data).includes(name)) {
+            flash("这个分组已经存在");
+            return;
+          }
+          if (commit({ groups: [{ name, at: Date.now() }, ...data.groups], marks: data.marks })) {
+            setNewGroup("");
+            setGroup(name);
+            flash(`已建分组「${name}」`);
+          }
+        };
+
+        const removeMark = (target) => {
+          commit({
+            groups: data.groups,
+            marks: data.marks.filter((mark) => mark.path !== target)
+          });
+        };
+
+        const removeGroup = (name) => {
+          // Removing a group moves its files back to the default group rather
+          // than deleting them: bookmarks are cheap, but losing them is rude.
+          commit({
+            groups: data.groups.filter((g) => g.name !== name),
+            marks: data.marks.map((mark) => (mark.group === name ? { ...mark, group: DEFAULT_GROUP } : mark))
+          });
+          if (filter === name) setFilter("");
+          flash(`「${name}」已移除，文件移到未分组`);
+        };
+
+        const moveTo = (target, name) => {
+          commit({
+            groups: data.groups,
+            marks: data.marks.map((mark) => (mark.path === target ? { ...mark, group: name } : mark))
+          });
+        };
+
+        /**
+         * Open a bookmarked file the way DSH itself does.
+         *
+         * `openWorkspacePath` needs an application on hosts with no recorded
+         * default, so resolve the associations first and pass the default
+         * application id; only fall back to a bare "open" when nothing is known.
+         */
+        /**
+         * Open a bookmarked file the way DSH itself does it.
+         *
+         * `openWorkspacePath` hands the file to an OS application, which fails on
+         * hosts with no recorded association ("文件可能已被移走或没有关联程序").
+         * The shell's own file cards instead open a RESOURCE IN THE RIGHT SIDEBAR
+         * via `sidebarRight.openResourceIn`, and that path needs no OS
+         * association at all. Try the sidebar first, then fall back.
+         */
+        /**
+         * Turn a name-only bookmark into a real path by asking the workspace to
+         * resolve it, then rewriting the stored entry.
+         */
+        /**
+         * Rewrite a name-only bookmark into an absolute path.
+         *
+         * Delegates to resolveToAbsolute, which joins onto the session cwd. The
+         * old body only tried two `workspaceFiles.stat` shapes that this build
+         * does not expose, so it always answered "没找到".
+         */
+        const repairMark = async (name) => {
+          const resolved = await resolveToAbsolute(name);
+          if (typeof resolved !== "string" || resolved === "") {
+            flash(`没找到「${name}」，可能需要手动填完整路径`);
+            return;
+          }
+          commit({
+            groups: data.groups,
+            marks: data.marks.map((mark) => (mark.path === name ? { ...mark, path: resolved } : mark))
+          });
+          flash("已修正为完整路径");
+        };
+
+        /**
+         * Open a bookmarked file exactly the way DSH does on Windows.
+         *
+         * The host resolves `open` through `explorer.exe` + a file URI, which is
+         * what a double-click uses. That route needs a path that actually exists,
+         * so the primary failure is a STALE path (a display name stored instead
+         * of the real one) rather than a missing program association.
+         *
+         * Order: sidebar (no filesystem needed) → host open → explorer fallback.
+         */
+        /**
+         * Open a bookmark IN THE SIDEBAR, like clicking a file card in DSH.
+         *
+         * `sidebarRight.openResourceIn` silently does nothing when the session
+         * has no adopted sidebar surface, which used to look like "the button is
+         * dead" and then fell through to opening a Windows app. This now reports
+         * exactly which precondition failed instead of quietly degrading.
+         *
+         * `openResourceIn` is synchronous and returns nothing, so success is
+         * assumed once the preconditions hold; the fallback is only offered when
+         * the sidebar genuinely cannot take the file.
+         */
+        const openInSidebar = (target) => {
+          const sidebar = getSidebar();
+          if (sidebar === undefined || typeof sidebar.openResourceIn !== "function") {
+            return "侧边栏接口不可用";
+          }
+          const sessionId = resolveSessionId();
+          if (sessionId === "") {
+            return "拿不到当前会话 ID";
+          }
+          try {
+            // No `destination`: place() opens a NEW tab for each file, so several
+            // bookmarks can be previewed at once. Passing destination:"sidebar"
+            // went through placeIn(), which reuses one tab per content id and
+            // therefore replaced the previously previewed file.
+            sidebar.openResourceIn(sessionId, fileAddress(sessionId, target), {});
+            return null;
+          } catch (error) {
+            return `侧边栏打开出错：${error instanceof Error ? error.message : String(error)}`;
+          }
+        };
+        /** Current working directory of the active session, if discoverable. */
+        const sessionCwd = () => {
+          try {
+            const store = getSessions();
+            const snap = store?.list?.getSnapshot?.() ?? store?.getSnapshot?.();
+            const id = resolveSessionId();
+            const entry = snap?.byId?.[id];
+            const cwd = entry?.cwd ?? entry?.workspacePath ?? snap?.cwd;
+            if (typeof cwd === "string" && cwd !== "") return cwd;
+          } catch {
+            /* fall through */
+          }
+          return "";
+        };
+
+        /**
+         * Join a workspace-relative path onto the session cwd.
+         *
+         * `session.workspaceFiles.stat` is not available under that name in this
+         * build, so `repairMark` always reported "没找到". Plain string joining
+         * needs no API and matches how the shell builds resource addresses.
+         */
+        const joinCwd = (cwd, relative) => {
+          if (cwd === "") return null;
+          const sep = /^[A-Za-z]:/.test(cwd) ? "\\" : "/";
+          const root = cwd.replace(/[/\\]+$/, "");
+          const tail = String(relative).replace(/^(?:\.?[/\\])+/, "");
+          return `${root}${sep}${tail}`;
+        };
+
+        /** Resolve a workspace-relative path to its absolute form. */
+        const resolveToAbsolute = async (relative) => {
+          const tryStat = async (result) => {
+            if (result?.ok && typeof result.value?.absolutePath === "string") {
+              return result.value.absolutePath;
+            }
+            return null;
+          };
+
+          // 1) Join onto the session cwd first. This needs no workspace-stat API
+          //    and mirrors how the shell builds resource addresses, so it is the
+          //    reliable route when the stat API is unavailable.
+          const cwd = sessionCwd();
+          const joined = joinCwd(cwd, relative);
+          if (joined !== null) {
+            try {
+              const viaJoin = await session?.workspaceFiles?.stat?.(undefined, joined);
+              const found = await tryStat(viaJoin);
+              if (found !== null) return found;
+            } catch {
+              /* keep trying */
+            }
+          }
+
+
+          const attempts = [relative];
+          // A mention may carry only the file name; try the common workspace
+          // roots before giving up.
+          if (!/[\\/]/.test(relative)) {
+            for (const prefix of ["wiki/", "docs/", "documents/", "src/", "assets/"]) {
+              attempts.push(`${prefix}${relative}`);
+            }
+          }
+
+          for (const candidate of attempts) {
+            try {
+              const viaFiles = await session?.workspaceFiles?.stat?.(undefined, candidate);
+              const found = await tryStat(viaFiles);
+              if (found !== null) return found;
+            } catch {
+              /* next */
+            }
+            try {
+              const viaSession = await session?.stat?.({ path: candidate });
+              const found = await tryStat(viaSession);
+              if (found !== null) return found;
+            } catch {
+              /* next */
+            }
+          }
+
+          // Last resort: search the workspace tree for a matching basename.
+          const base = relative.split(/[\\/]/).pop();
+          try {
+            const results = await session?.workspaceFiles?.search?.(undefined, base);
+            const list = results?.ok ? results.value : null;
+            if (Array.isArray(list)) {
+              const hit = list.find((entry) => {
+                const p = typeof entry === "string" ? entry : entry?.path;
+                return typeof p === "string" && p.split(/[\\/]/).pop() === base;
+              });
+              const p = typeof hit === "string" ? hit : hit?.path;
+              if (typeof p === "string" && p !== "") return p;
+            }
+          } catch {
+            /* search unavailable */
+          }
+
+          // Nothing verified. Return the cwd-joined path anyway: it is the correct
+          // absolute location, and a failed stat must not block opening a real file.
+          return joined;
+        };
+
+        const openPath = async (target) => {
+          let absoluteTarget = target;
+          const isAbsolute = (value) => /^[A-Za-z]:[\\/]/.test(value)
+            || value.startsWith("\\\\")
+            || value.startsWith("/");
+
+          if (!isAbsolute(absoluteTarget)) {
+            // The resource address is workspace-relative and the sidebar resolves
+            // it against the workspace root, so opening works either way. Only the
+            // stored entry gets upgraded, so later opens skip this lookup.
+            const resolved = await resolveToAbsolute(absoluteTarget);
+            if (resolved !== null) {
+              absoluteTarget = resolved;
+              try {
+                commit({
+                  groups: data.groups,
+                  marks: data.marks.map((mark) => (mark.path === target ? { ...mark, path: resolved } : mark))
+                });
+              } catch {
+                /* best-effort */
+              }
+            }
+          }
+
+          const sidebarProblem = openInSidebar(absoluteTarget);
+          if (sidebarProblem === null) {
+            flash("已在右侧栏打开");
+            return;
+          }
+
+          // The sidebar cannot show it. Say why, then fall back to the host
+          // opener (explorer.exe on Windows) rather than leaving a dead button.
+          try {
+            const result = await session?.openWorkspacePath?.({ path: absoluteTarget, action: "open" });
+            if (result?.ok) flash(`${sidebarProblem}，已改用系统程序打开`);
+            else flash(`${sidebarProblem}，系统也打不开（文件可能已被移走）`);
+          } catch {
+            flash(`${sidebarProblem}，系统也打不开`);
+          }
+        };;;
+
+        const names = groupNames(data);
+        const visible = filter === "" ? data.marks : data.marks.filter((mark) => mark.group === filter);
+
+        // Group the visible marks; a group with no marks is still listed when it
+        // is the active filter so the header never lies about being empty.
+        const buckets = [];
+        for (const name of names) {
+          if (filter !== "" && name !== filter) continue;
+          const items = visible.filter((mark) => mark.group === name);
+          if (items.length === 0 && filter === "") continue;
+          buckets.push({ name, items });
+        }
+        const orphans = visible.filter((mark) => !names.includes(mark.group));
+        if (orphans.length > 0) buckets.push({ name: DEFAULT_GROUP, items: orphans });
+
+        const markRow = (mark) =>
+          React.createElement("div", {
+            className: `ganyu-mark__item${freshPath === mark.path ? " ganyu-mark__item--new" : ""}`,
+            key: mark.path
+          },
+            React.createElement("div", { className: "ganyu-mark__meta" },
+              React.createElement("span", { className: "ganyu-mark__name", title: mark.path }, mark.label),
+              React.createElement("span", { className: "ganyu-mark__pathrow" },
+                React.createElement("span", { className: "ganyu-mark__path", title: mark.path }, mark.path),
+                mark.at ? React.createElement("span", { className: "ganyu-mark__time" }, relativeTime(mark.at)) : null
+              ),
+              mark.from
+                ? React.createElement("span", { className: "ganyu-mark__from", title: `来自对话：${mark.from}` }, `出自「${mark.from}」`)
+                : null
+            ),
+            React.createElement("div", { className: "ganyu-mark__acts" },
+              React.createElement("select", {
+                className: "ganyu-mark__move",
+                title: "移动到分组",
+                value: mark.group,
+                onChange: (event) => moveTo(mark.path, event.target.value)
+              }, names.map((name) => React.createElement("option", { key: name, value: name }, name))),
+              React.createElement("button", {
+                type: "button", className: "ganyu-mark__act", title: "打开", "aria-label": `打开 ${mark.label}`,
+                onClick: () => void openPath(mark.path)
+              }, "打开"),
+              // A bookmark whose stored path is only a name can never open; offer
+              // a repair instead of leaving a dead row on the shelf.
+              mark.path !== "" && !/^[A-Za-z]:[\\/]/.test(mark.path) && !mark.path.startsWith("/")
+                ? React.createElement("button", {
+                    type: "button",
+                    className: "ganyu-mark__act ganyu-mark__act--fix",
+                    title: "这个名字不是完整路径，点击在工作区里重新定位",
+                    onClick: () => void repairMark(mark.path)
+                  }, "修复")
+                : null,
+              React.createElement("button", {
+                type: "button", className: "ganyu-mark__act ganyu-mark__act--danger", title: "取下", "aria-label": `移除 ${mark.label}`,
+                onClick: () => removeMark(mark.path)
+              }, "×")
+            )
+          );
+
+        const groupBlock = (bucket) =>
+          React.createElement("div", { className: "ganyu-mark__group", key: bucket.name },
+            React.createElement("div", { className: "ganyu-mark__grouphead" },
+              React.createElement("span", { className: "ganyu-mark__groupname" }, bucket.name),
+              React.createElement("span", { className: "ganyu-mark__groupcount" }, String(bucket.items.length)),
+              bucket.name !== DEFAULT_GROUP
+                ? React.createElement("button", {
+                    type: "button", className: "ganyu-mark__groupdel", title: `移除分组「${bucket.name}」`,
+                    onClick: () => removeGroup(bucket.name)
+                  }, "×")
+                : null
+            ),
+            bucket.items.length === 0
+              ? React.createElement("div", { className: "ganyu-mark__groupempty" }, "（这组还是空的）")
+              : React.createElement("div", { className: "ganyu-mark__list" }, bucket.items.map(markRow))
+          );
+
+        return React.createElement("div", { className: "ganyu-mark", ref: rootRef },
+          React.createElement("button", {
+            type: "button",
+            className: `ganyu-mark__trigger${open ? " ganyu-mark__trigger--on" : ""}`,
+            title: "雪泥鸿爪：收着常看的文件路径",
+            "aria-label": `雪泥鸿爪，已收 ${data.marks.length} 个`,
+            "aria-expanded": open,
+            onClick: () => setOpen((value) => !value)
+          },
+            React.createElement("span", { className: "ganyu-mark__glyph", "aria-hidden": "true" }, "❄"),
+            React.createElement("span", { className: "ganyu-mark__label" }, "雪泥鸿爪"),
+            data.marks.length > 0
+              ? React.createElement("span", {
+                  className: `ganyu-mark__count${popped ? " ganyu-mark__count--pop" : ""}`
+                }, String(data.marks.length))
+              : null
+          ),
+          open
+            ? React.createElement("div", { className: "ganyu-mark__panel", role: "dialog", "aria-label": "雪泥鸿爪" },
+                React.createElement("div", { className: "ganyu-mark__head" },
+                  React.createElement("span", { className: "ganyu-mark__title" }, "❄ 雪泥鸿爪"),
+                  React.createElement("span", { className: "ganyu-mark__hint" }, "留痕于此，随时取用")
+                ),
+
+                // Group filter chips.
+                names.length > 0
+                  ? React.createElement("div", { className: "ganyu-mark__chips" },
+                      React.createElement("span", {
+                        role: "button", tabIndex: 0,
+                        className: `ganyu-mark__chip${filter === "" ? " ganyu-mark__chip--on" : ""}`,
+                        onClick: () => setFilter(""),
+                        onKeyDown: (event) => {
+                          if (event.key === "Enter" || event.key === " ") setFilter("");
+                        }
+                      }, "全部"),
+                      names.map((name) =>
+                        React.createElement("span", {
+                          key: name,
+                          role: "button", tabIndex: 0,
+                          className: `ganyu-mark__chip${filter === name ? " ganyu-mark__chip--on" : ""}`,
+                          onClick: () => setFilter(filter === name ? "" : name),
+                          onKeyDown: (event) => {
+                            if (event.key === "Enter" || event.key === " ") setFilter(filter === name ? "" : name);
+                          }
+                        }, name)
+                      )
+                    )
+                  : null,
+
+                // New mark form.
+                React.createElement("div", { className: "ganyu-mark__form" },
+                  React.createElement("input", {
+                    className: "ganyu-mark__input",
+                    placeholder: "文件路径，如 C:\\work\\out.png",
+                    value: path,
+                    onChange: (event) => setPath(event.target.value),
+                    onKeyDown: (event) => {
+                      if (event.key === "Enter") addMark();
+                    }
+                  }),
+                  React.createElement("div", { className: "ganyu-mark__row2" },
+                    React.createElement("input", {
+                      className: "ganyu-mark__input",
+                      placeholder: "备注名（可选）",
+                      value: label,
+                      onChange: (event) => setLabel(event.target.value)
+                    }),
+                    React.createElement("select", {
+                      className: "ganyu-mark__select",
+                      value: group,
+                      onChange: (event) => setGroup(event.target.value),
+                      title: "存入哪个分组"
+                    }, names.concat(names.includes(DEFAULT_GROUP) ? [] : [DEFAULT_GROUP]).map((name) =>
+                      React.createElement("option", { key: name, value: name }, name)
+                    ))
+                  ),
+                  React.createElement("div", { className: "ganyu-mark__row2" },
+                    React.createElement("input", {
+                      className: "ganyu-mark__input",
+                      placeholder: "新建分组（可选）",
+                      value: newGroup,
+                      onChange: (event) => setNewGroup(event.target.value),
+                      onKeyDown: (event) => {
+                        if (event.key === "Enter") addGroup();
+                      }
+                    }),
+                    React.createElement("button", {
+                      type: "button", className: "ganyu-mark__ghost", onClick: addGroup
+                    }, "建组"),
+                    React.createElement("button", {
+                      type: "button", className: "ganyu-mark__add", onClick: addMark
+                    }, "收入")
+                  )
+                ),
+
+                notice !== ""
+                  ? React.createElement("div", { className: "ganyu-mark__notice" }, notice)
+                  : null,
+
+                buckets.length === 0
+                  ? React.createElement("div", { className: "ganyu-mark__empty" },
+                      data.marks.length === 0
+                        ? "还是空的。对话里点文件卡片右上角的 ❄，或者在上面填路径。"
+                        : "这个分组下还没有内容。")
+                  : React.createElement("div", { className: "ganyu-mark__groups" }, buckets.map(groupBlock))
+              )
+            : null
+        );
+      };
+    }
+
+
+    /**
+     * Put a ❄ affordance on every presented-file card in the conversation.
+     *
+     * The card is owned by `dsh-client-ui-deliverables`; it exposes the resolved
+     * absolute path in its preview button's `title`, so this decorates rather
+     * than replaces. Clicking posts `ganyu:mark` / `ganyu:unmark`; the shelf is
+     * the only writer of the store.
+     *
+     * The label is derived from the STORE, never from a timer, so a kept file
+     * stays "已收" across redraws and reloads; clicking a kept card removes it.
+     *
+     * ANTI-LOOP: every DOM write is guarded by a value comparison AND performed
+     * with the MutationObserver disconnected. Writing textContent unconditionally
+     * mutates the DOM even when the string is identical, which re-enters ensure()
+     * through the observer and locks the tab.
+     */
+    /**
+     * Find whatever element actually renders a given piece of text, and describe
+     * it completely. Selector guesses failed repeatedly because the shell renders
+     * a file mention in a form none of them matched; this walks the DOM by TEXT
+     * instead, so it cannot miss.
+     *
+     * Usage from DevTools:  ganyuFindRef('ganyu-wiki')
+     */
+    /**
+     * Manual override: bookmark whatever element renders `needle`.
+     *
+     * When automatic detection misses a shape, this is the escape hatch —
+     * `ganyuMarkRef('ganyu-wiki')` adds the bookmark and puts the pill beside the
+     * element without needing a selector that matches.
+     */
+    function markReferenceByText(needle) {
+      // Prefer a real file-mention element; fall back to any node whose TITLE
+      // holds the path, then to text.
+      const mentions = [...document.querySelectorAll(
+        "[class*='fileMention'], [class*='fileLink'], [data-ref-chip]"
+      )];
+      let el = mentions.find((node) => {
+        const title = node.getAttribute("title") || "";
+        return title.indexOf(needle) >= 0 || (node.textContent || "").indexOf(needle) >= 0;
+      }) ?? null;
+
+      if (el === null) {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let node = walker.nextNode();
+        while (node !== null) {
+          if ((node.nodeValue || "").indexOf(needle) >= 0 && node.parentElement !== null) {
+            el = node.parentElement;
+            break;
+          }
+          node = walker.nextNode();
+        }
+      }
+      if (el === null) return "没找到包含这段文字的元素";
+
+      // title first: a mention shows only the short label, the path is in title.
+      const source = el.getAttribute?.("title") || el.textContent || "";
+      const name = /([^\\/]+\.(?:md|markdown|txt|json|ya?ml|png|jpe?g|webp|gif|svg|pdf))$/i.exec(source.trim());
+      if (name === null) return "这段文字里没有能识别的文件名";
+
+      const path = name[1];
+      const current = readMarks();
+      if (current.marks.some((mark) => mark.path === path)) {
+        return `「${path}」已经在收藏里了`;
+      }
+      const next = {
+        groups: current.groups.some((group) => group.name === DEFAULT_GROUP)
+          ? current.groups
+          : [{ name: DEFAULT_GROUP, at: Date.now() }, ...current.groups],
+        marks: [
+          { path, label: path, group: DEFAULT_GROUP, at: Date.now(), from: currentConversationTitle() },
+          ...current.marks
+        ]
+      };
+      if (!writeMarks(next)) return "存入失败";
+      window.dispatchEvent(new CustomEvent("ganyu:marks-changed"));
+      return `已收入雪泥鸿爪：${path}`;
+    }
+
+    function findReferenceByText(needle) {
+      if (typeof document === "undefined" || typeof needle !== "string" || needle === "") {
+        return null;
+      }
+      const results = [];
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          return node.nodeValue !== null && node.nodeValue.indexOf(needle) >= 0
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        }
+      });
+
+      let node = walker.nextNode();
+      while (node !== null && results.length < 8) {
+        const el = node.parentElement;
+        if (el !== null) {
+          const attrs = {};
+          for (const attr of el.attributes) attrs[attr.name] = attr.value.slice(0, 120);
+          const chain = [];
+          let up = el;
+          for (let depth = 0; depth < 5 && up !== null; depth += 1, up = up.parentElement) {
+            chain.push(`${up.tagName.toLowerCase()}${up.className ? `.${String(up.className).split(" ").join(".")}` : ""}`);
+          }
+          results.push({
+            text: (node.nodeValue || "").trim().slice(0, 80),
+            tag: el.tagName,
+            className: String(el.className || "").slice(0, 160),
+            attrs,
+            outerHTML: el.outerHTML.slice(0, 400),
+            ancestors: chain
+          });
+        }
+        node = walker.nextNode();
+      }
+      return results;
+    }
+
+    /**
+     * One-shot DOM report: what file-ish nodes exist and whether the theme
+     * recognised them. Exposed on `window.ganyuMarksDiag` so it can be called
+     * again from DevTools without reinstalling anything.
+     */
+    function marksDiagnostics() {
+      if (typeof document === "undefined") return null;
+      const report = {
+        presented: [],
+        attachments: [],
+        images: [],
+        links: [],
+        marked: [],
+        unrecognisedImages: [],
+        unrecognisedLinks: []
+      };
+
+      for (const card of document.querySelectorAll("[data-presented-file]")) {
+        report.presented.push({
+          title: card.querySelector("button[title]")?.getAttribute("title") || "",
+          hasMark: card.querySelector("[data-ganyu-card-mark]") !== null
+        });
+      }
+
+      for (const card of document.querySelectorAll("[data-message-attachments] [class*='fileCard']")) {
+        report.attachments.push({
+          title: card.getAttribute("title") || "",
+          hasMark: card.querySelector("[data-ganyu-card-mark]") !== null
+        });
+      }
+
+      for (const img of document.querySelectorAll("img")) {
+        const src = img.getAttribute("src") || "";
+        const entry = { src: src.slice(0, 90), hasMark: false };
+        let n = img.parentElement;
+        for (let depth = 0; depth < 4 && n !== null; depth += 1, n = n.parentElement) {
+          if (n.querySelector?.("[data-ganyu-card-mark]") !== null) { entry.hasMark = true; break; }
+        }
+        if (src.startsWith("dsh-resource://file/")) report.images.push(entry);
+        else report.unrecognisedImages.push(entry);
+      }
+
+      // Anything that looks like a workspace file reference, however the shell
+      // chose to render it (custom element, data attribute, or plain text).
+      report.refChips = [...document.querySelectorAll("[data-ref-chip], [class*='fileMention'], [class*='fileLink']")].map((n) => ({
+        appearance: n.getAttribute("data-ref-chip"),
+        title: n.getAttribute("title"),
+        text: (n.textContent || "").trim().slice(0, 40),
+        hasMark: n.nextElementSibling?.hasAttribute?.("data-ganyu-card-mark") === true
+      }));
+
+      report.fileish = [...document.querySelectorAll("[data-resource-address], [data-file-path], [data-path]")]
+        .slice(0, 8)
+        .map((n) => ({
+          tag: n.tagName,
+          attrs: [...n.attributes].map((a) => `${a.name}=${a.value.slice(0, 60)}`).join(" ")
+        }));
+
+      for (const a of document.querySelectorAll("a[href]")) {
+        const href = a.getAttribute("href") || "";
+        const looksFile = /\.(png|jpe?g|webp|gif|md|txt|json|pdf|zip|mp4|webm)(\?|#|$)/i.test(href)
+          || href.startsWith("dsh-resource://")
+          || href.startsWith("file:");
+        if (!looksFile) continue;
+        const entry = {
+          href: href.slice(0, 90),
+          text: (a.textContent || "").trim().slice(0, 40),
+          hasMark: a.parentElement?.querySelector("[data-ganyu-card-mark]") !== null
+        };
+        if (href.startsWith("dsh-resource://file/")) report.links.push(entry);
+        else report.unrecognisedLinks.push(entry);
+      }
+
+      for (const b of document.querySelectorAll("[data-ganyu-card-mark]")) {
+        report.marked.push({
+          kind: b.getAttribute("data-ganyu-kind"),
+          path: b.getAttribute("data-ganyu-path"),
+          label: b.textContent
+        });
+      }
+
+      // Raw snippets: if a selector misses, this shows the markup to match on.
+      report.snippets = {
+        images: [...document.querySelectorAll("img")]
+          .slice(0, 4)
+          .map((n) => n.outerHTML.slice(0, 300)),
+        links: [...document.querySelectorAll("a[href]")]
+          .slice(0, 4)
+          .map((n) => n.outerHTML.slice(0, 300))
+      };
+
+      // Copy the whole report to the clipboard when possible, so it can be
+      // pasted back without retyping.
+      try {
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          void navigator.clipboard.writeText(JSON.stringify(report, null, 2));
+        }
+      } catch {
+        /* clipboard optional */
+      }
+
+      return report;
+    }
+
+    /**
+     * Mount the shelf into the conversation header by DOM, not by slot.
+     *
+     * This build exposes only `conversation.session.header.corner`, and that one
+     * is already used by the shell's own 打开右侧边栏 button; `utilities` does not
+     * exist at all. `[data-conversation-header-corner]` is the stable wrapper
+     * around the header's right-hand control cluster, so the shelf is inserted
+     * there as a sibling of the native buttons.
+     *
+     * The React root is created once and re-rendered, so the shelf keeps its
+     * open/closed state across header re-renders; the observer only re-inserts
+     * the host node if it was removed.
+     */
+    function mountMarksHeader(Component) {
+      if (typeof document === "undefined" || typeof MutationObserver === "undefined") return () => {};
+      const doc = document;
+      const HOST = "data-ganyu-marks-host";
+      let reactRoot = null;
+      let mountNode = null;
+
+      const createRootFn = () => {
+        const direct = ReactDOM?.createRoot;
+        if (typeof direct === "function") return direct;
+        const viaDefault = ReactDOM?.default?.createRoot;
+        return typeof viaDefault === "function" ? viaDefault : null;
+      };
+
+      /** Tear down the current React root before its host node goes away. */
+      const dropRoot = () => {
+        try {
+          reactRoot?.unmount();
+        } catch {
+          /* already gone */
+        }
+        reactRoot = null;
+        if (mountNode !== null) mountNode.remove();
+        mountNode = null;
+      };
+
+      const ensure = () => {
+        const create = createRootFn();
+        if (create === null) return;
+
+        const corner = doc.querySelector("[data-conversation-header-corner]");
+        if (corner === null) {
+          // No header (welcome screen): release the root so a later header starts
+          // from scratch rather than rendering into a detached node.
+          if (mountNode !== null) dropRoot();
+          return;
+        }
+
+        // Already mounted into THIS corner: nothing to do. Re-rendering here
+        // would mutate the DOM on every observer tick and spin forever.
+        if (mountNode !== null && mountNode.isConnected && corner.contains(mountNode)) {
+          if (reactRoot === null) {
+            reactRoot = create(mountNode);
+            reactRoot.render(React.createElement(Component));
+          }
+          return;
+        }
+
+        // The header was rebuilt (switching conversations), so the old node is
+        // detached and its React root is now unreachable. Destroy the root and
+        // build a fresh node; otherwise every later render paints into a hidden
+        // node and the button silently disappears.
+        if (reactRoot !== null || mountNode !== null) dropRoot();
+
+        mountNode = doc.createElement("div");
+        mountNode.setAttribute(HOST, "");
+        mountNode.style.display = "inline-flex";
+        mountNode.style.alignItems = "center";
+        mountNode.style.marginRight = "6px";
+        corner.insertBefore(mountNode, corner.firstChild);
+
+        reactRoot = create(mountNode);
+        reactRoot.render(React.createElement(Component));
+      };
+
+      let observer = null;
+      const quietEnsure = () => {
+        if (observer !== null) observer.disconnect();
+        try {
+          ensure();
+        } finally {
+          if (observer !== null) observer.observe(doc.body, { childList: true, subtree: true });
+        }
+      };
+
+      quietEnsure();
+      observer = new MutationObserver(() => quietEnsure());
+      observer.observe(doc.body, { childList: true, subtree: true });
+
+      return () => {
+        observer.disconnect();
+        try {
+          reactRoot?.unmount();
+        } catch {
+          /* already unmounted */
+        }
+        reactRoot = null;
+        mountNode?.remove();
+        mountNode = null;
+      };
+    }
+
+    function mountFileCardMarks() {
+      if (typeof document === "undefined" || typeof MutationObserver === "undefined") return () => {};
+      const MARK = "data-ganyu-card-mark";
+      const doc = document;
+      let observer = null;
+
+      /** Run a DOM write with the observer detached, then re-attach it. */
+      const quiet = (fn) => {
+        if (observer !== null) observer.disconnect();
+        try {
+          fn();
+        } finally {
+          if (observer !== null) observer.observe(doc.body, { childList: true, subtree: true });
+        }
+      };
+
+      /**
+       * Absolute path for a presented-file card.
+       *
+       * `title` is NOT reliable: depending on the entry it can hold the display
+       * name ("bookmark-targets.png") instead of the resolved path, and storing
+       * that produced bookmarks that could never open. Prefer a value that looks
+       * absolute; otherwise remember it as a bare NAME so the shelf can resolve
+       * it against the workspace before storing.
+       */
+      const looksAbsolute = (value) => /^[A-Za-z]:[\\/]/.test(value)
+        || value.startsWith("\\\\")
+        || value.startsWith("/");
+
+      const pathOfCard = (card) => {
+        const candidates = [];
+        const preview = card.querySelector("button[title]");
+        const title = preview?.getAttribute("title") || "";
+        if (title !== "") candidates.push(title);
+
+        const aria = preview?.getAttribute("aria-label") || "";
+        const colon = aria.indexOf(":");
+        if (colon >= 0) candidates.push(aria.slice(colon + 1).trim());
+
+        // A dsh-resource href/src is the resolved address when present.
+        for (const node of card.querySelectorAll("a[href], img[src]")) {
+          const value = node.getAttribute("href") || node.getAttribute("src") || "";
+          if (value.startsWith("dsh-resource://file/")) {
+            const rest = value.slice("dsh-resource://file/session/".length);
+            const slash = rest.indexOf("/");
+            if (slash >= 0) {
+              try {
+                candidates.push(decodeURIComponent(rest.slice(slash + 1)));
+              } catch {
+                /* ignore malformed */
+              }
+            }
+          }
+        }
+
+        const absolute = candidates.find((value) => looksAbsolute(value));
+        if (absolute !== undefined) return { path: absolute, nameOnly: false };
+
+        const name = candidates.find((value) => value !== "") ?? "";
+        return { path: name, nameOnly: name !== "" };
+      };
+
+      // A Set is rebuilt once per scan; `some()` was a linear walk per button and
+      // ran for every element on every pass.
+      let storedPaths = new Set();
+      const refreshStored = () => {
+        storedPaths = new Set(readMarks().marks.map((mark) => mark.path));
+      };
+      const isStored = (path) => storedPaths.has(path);
+
+      /** Repaint one button from the store; no-op when already correct. */
+      const paint = (button, path) => {
+        const words = button.querySelector(".ganyu-card-mark__label");
+        const stored = isStored(path);
+        const wantLabel = stored ? "已收" : "收录";
+        const wantTitle = stored ? "已在雪泥鸿爪中，点击取消收录" : "收进雪泥鸿爪";
+        const wantDone = stored;
+
+        if (button.classList.contains("ganyu-card-mark--done") === wantDone
+            && button.title === wantTitle
+            && (words === null || words.textContent === wantLabel)) {
+          return; // nothing to do: avoids any mutation, hence no observer bounce
+        }
+
+        quiet(() => {
+          button.classList.toggle("ganyu-card-mark--done", wantDone);
+          button.title = wantTitle;
+          if (words !== null && words.textContent !== wantLabel) words.textContent = wantLabel;
+        });
+      };
+
+      const repaintAll = () => {
+        refreshStored();
+        for (const button of doc.querySelectorAll(`[${MARK}]`)) {
+          const path = button.getAttribute("data-ganyu-path") || "";
+          if (path !== "") paint(button, path);
+        }
+      };
+
+      /**
+       * Every place a file can appear in a conversation. Each entry yields
+       * { host, path } where `host` is the element the ❄ is appended to.
+       *
+       * 1. `[data-presented-file]` — a tool "presented" deliverable card; it
+       *    carries the resolved absolute path in its preview button's title.
+       * 2. `[data-message-attachments] [class*="fileCard"]` — a file the user
+       *    attached. It has no path attribute, so the name is taken and marked
+       *    as name-only (the shelf resolves or asks for the rest).
+       * 3. Markdown images — `img[src^="dsh-resource://file/"]`, plus plain
+       *    `img` whose src resolves under the workspace.
+       */
+      /**
+       * Decode a workspace path out of any address the shell uses.
+       *
+       * The shell writes file references in several shapes and the exact one
+       * varies by build/feature, so every known form is accepted instead of
+       * betting on a single prefix:
+       *   dsh-resource://file/session/<sid>/<encoded path>
+       *   /api/file?path=<encoded absolute path>
+       *   dsh-app://app/api/file?path=...
+       *   file:///C:/...
+       * A plain absolute path is returned unchanged.
+       */
+      const pathFromAddress = (address) => {
+        if (typeof address !== "string" || address === "") return null;
+        const decode = (value) => {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return value;
+          }
+        };
+
+        if (address.startsWith("dsh-resource://file/")) {
+          const rest = address.slice("dsh-resource://file/".length);
+          const parts = rest.split("/");
+          // session/<sid>/<path...>  or a bare path
+          const cut = parts[0] === "session" ? 2 : 0;
+          const path = parts.slice(cut).join("/");
+          return path === "" ? null : decode(path);
+        }
+
+        if (address.includes("api/file?")) {
+          const query = address.slice(address.indexOf("api/file?") + "api/file?".length);
+          const match = /(?:^|&)path=([^&]*)/.exec(query);
+          if (match === null) return null;
+          const decoded = decode(match[1]);
+          return decoded === "" ? null : decoded;
+        }
+
+        if (address.startsWith("file://")) {
+          const path = decode(address.replace(/^file:\/\/\/?/, ""));
+          return path === "" ? null : path;
+        }
+
+        if (/^[A-Za-z]:[\\/]/.test(address) || address.startsWith("/")) return address;
+
+        // Relative workspace paths are the common case in rendered markdown
+        // ("[doc](docs/a.md)"). Returning null here is why old conversations never
+        // got a button: the address was a bare relative path, not a URL.
+        if (address.startsWith("./") || address.startsWith("../")) return address;
+        if (/^[^\s:?#]+\.(?:md|markdown|txt|json|ya?ml|toml|csv|pdf|png|jpe?g|webp|gif|svg|avif|mp4|webm|zip|log|ts|js|tsx|jsx|py|rs|go|java|c|cc|cpp|h|hpp|sh|ps1)$/i.test(address)) {
+          return address;
+        }
+        return null;
+      };
+
+      const collectTargets = () => {
+        const targets = [];
+        // Dedupe by the element the button hangs off, not by its host's tag name.
+        // Using the tag collapsed every link in one <p> into a single bookmark.
+        const seenEls = new WeakSet();
+
+        const push = (target) => {
+          if (target.anchor === undefined || target.anchor === null) return;
+          if (seenEls.has(target.anchor)) return;
+          seenEls.add(target.anchor);
+          targets.push(target);
+        };
+
+        // 1) Tool-produced deliverable cards.
+        for (const card of doc.querySelectorAll("[data-presented-file]")) {
+          const found = pathOfCard(card);
+          if (found.path !== "") {
+            push({ host: card, anchor: card, path: found.path, kind: "presented", nameOnly: found.nameOnly });
+          }
+        }
+
+        // 2) Files attached by the user.
+        for (const card of doc.querySelectorAll("[data-message-attachments] [class*='fileCard']")) {
+          const name = card.getAttribute("title") || "";
+          if (name !== "") push({ host: card, anchor: card, path: name, kind: "attachment", nameOnly: true });
+        }
+
+        // 3) Hyperlinked files in rendered markdown.
+        //
+        // Anchors are the common case, but the shell also renders references as
+        // role=link elements and as elements carrying a data attribute with the
+        // address. All three are scanned; `data-ganyu-skipal` records anything
+        // that looked like a reference but produced no path, for diagnostics.
+        const linkNodes = [
+          ...doc.querySelectorAll("a[href]"),
+          ...doc.querySelectorAll("[role='link'][href], [role='link'][data-href]"),
+          ...doc.querySelectorAll("[data-resource-address], [data-file-path], [data-reference]"),
+          // The shell renders an "@file" mention as a ReferenceChip: a span or
+          // button carrying `data-ref-chip="file"` whose `title` is the raw
+          // reference text. It has no href, which is why every earlier scan
+          // missed it entirely.
+          ...doc.querySelectorAll("[data-ref-chip]"),
+          // Real shape in this build: a button with a hashed class stem.
+          ...doc.querySelectorAll("[class*='fileMention'], [class*='fileLink']")
+        ];
+
+        /**
+         * Every string that could name this element's target, most specific first.
+         *
+         * A reference chip carries no href at all: its target lives in `title`
+         * (the raw reference text) and possibly in a data attribute. Accepting a
+         * single attribute was too brittle — one build difference and the chip
+         * silently produced nothing.
+         */
+        const candidateAddresses = (node) => {
+          const out = [];
+          const push2 = (value) => {
+            if (typeof value !== "string") return;
+            const cleaned = value.trim()
+              .replace(/^@+/, "")
+              .replace(/^["']|["']$/g, "")
+              .trim();
+            if (cleaned !== "") out.push(cleaned);
+          };
+
+          push2(node.getAttribute?.("href"));
+          push2(node.getAttribute?.("data-href"));
+          push2(node.getAttribute?.("data-resource-address"));
+          push2(node.getAttribute?.("data-file-path"));
+          push2(node.getAttribute?.("data-reference"));
+          push2(node.getAttribute?.("data-path"));
+          push2(node.getAttribute?.("title"));
+
+          // The visible label is the last resort; only useful when it looks like
+          // a file name (the shell shows `ganyu-wiki.md` there).
+          const text = (node.textContent || "").trim();
+          if (/[.\/]/.test(text) && text.length <= 260) push2(text);
+
+          return out;
+        };
+
+        for (const link of linkNodes) {
+          const candidates = candidateAddresses(link);
+          if (candidates.length === 0) continue;
+
+          let path = null;
+          let bestScore = -1;
+          for (const candidate of candidates) {
+            if (candidate.startsWith("#") || /^https?:/i.test(candidate)) continue;
+            const resolved = pathFromAddress(candidate);
+            if (resolved === null) continue;
+            // Rank: absolute beats relative-with-directory beats bare name.
+            const score = /^([A-Za-z]:[\\/]|\/)/.test(resolved)
+              ? 3
+              : (resolved.includes("/") ? 2 : 1);
+            if (score > bestScore) {
+              bestScore = score;
+              path = resolved;
+            }
+          }
+          if (path === null) continue;
+          push({ host: link.parentElement ?? link, anchor: link, path, kind: "link", inline: true });
+        }
+
+        // 4) Every image that is actually displayed gets a bookmark.
+        //
+        // No size filter and no container check: the user wants the affordance on
+        // any visible picture. The only thing that was wrong before was the pill
+        // sitting INSIDE the image's zoom button, so hovering the strip under the
+        // picture still zoomed; that is handled at insertion time instead.
+        for (const img of doc.querySelectorAll("img[src]")) {
+          const src = img.getAttribute("src") || "";
+          const holder = img.closest("figure, a, p, div") ?? img.parentElement;
+          if (holder === null) continue;
+
+          let path = pathFromAddress(src);
+
+          // Inline data URIs have no path. If the surrounding node carries a
+          // file name (the shell labels generated images), use that instead so
+          // the bookmark at least records which file it was.
+          if (path === null && src.startsWith("data:")) {
+            const labelled = img.getAttribute("alt")
+              || img.getAttribute("title")
+              || holder.getAttribute("title")
+              || "";
+            const named = /([^\\/]+\.(?:png|jpe?g|webp|gif|avif))$/i.exec(labelled);
+            if (named !== null) path = named[1];
+          }
+
+          if (path === null) continue;
+          push({
+            host: holder,
+            anchor: img,
+            path,
+            kind: "image",
+            nameOnly: pathFromAddress(src) === null
+          });
+        }
+
+        return targets;
+      };;
+
+      /**
+       * Find the button already attached to one element, tolerating the two
+       * shapes we produce:
+       *   * wrapped:  <span.ganyu-img-wrap><anchor/><button/></span>
+       *   * sibling:  <anchor/><button/>
+       * Element identity is checked with a WeakMap as well, because React may
+       * rebuild the anchor and leave an orphaned button behind otherwise.
+       */
+      const mountedFor = new WeakMap();
+
+      /**
+       * Find an existing pill for this target, scanning the whole neighbourhood.
+       *
+       * Previous versions only checked `anchorEl.nextElementSibling` and the image
+       * wrapper. Depending on where the pill was inserted (inside a presented card,
+       * inside a wrap, or as a sibling) that check missed it, so every pass created
+       * ANOTHER button — the "buttons keep multiplying" report. Scanning outward
+       * from the anchor to the nearest stable container catches all three layouts.
+       */
+      const findExisting = (anchorEl, host, path) => {
+        const known = mountedFor.get(anchorEl);
+        if (known !== undefined && known.isConnected && known.getAttribute("data-ganyu-path") === path) {
+          return known;
+        }
+
+        const matches = (node) => node !== null
+          && node.hasAttribute?.(MARK) === true
+          && node.getAttribute("data-ganyu-path") === path;
+
+        // 1) immediate siblings
+        if (matches(anchorEl.nextElementSibling)) {
+          mountedFor.set(anchorEl, anchorEl.nextElementSibling);
+          return anchorEl.nextElementSibling;
+        }
+        if (matches(anchorEl.previousElementSibling)) {
+          mountedFor.set(anchorEl, anchorEl.previousElementSibling);
+          return anchorEl.previousElementSibling;
+        }
+
+        // 2) this anchor's own subtree (a presented card holds the pill inside)
+        for (const node of anchorEl.querySelectorAll?.(`[${MARK}]`) ?? []) {
+          if (node.getAttribute("data-ganyu-path") === path) {
+            mountedFor.set(anchorEl, node);
+            return node;
+          }
+        }
+
+        // 3) climb a few levels and scan any pill whose anchor sits in that scope
+        let scope = anchorEl.parentElement;
+        for (let depth = 0; depth < 3 && scope !== null; depth += 1, scope = scope.parentElement) {
+          for (const node of scope.querySelectorAll(`[${MARK}]`)) {
+            if (node.getAttribute("data-ganyu-path") === path) {
+              mountedFor.set(anchorEl, node);
+              return node;
+            }
+          }
+        }
+
+        // 4) last resort: the passed-in host (the card / row)
+        if (host !== null && host !== undefined) {
+          for (const node of host.querySelectorAll?.(`[${MARK}]`) ?? []) {
+            if (node.getAttribute("data-ganyu-path") === path) {
+              mountedFor.set(anchorEl, node);
+              return node;
+            }
+          }
+        }
+        return null;
+      };
+
+      /**
+       * Remove buttons whose anchor is gone or detached. Without this, a React
+       * rebuild of an image left the old wrapped button in the DOM and every
+       * pass added another one — which is exactly the "button keeps multiplying"
+       * symptom after opening and closing the lightbox.
+       */
+      const sweepOrphans = () => {
+        for (const button of doc.querySelectorAll(`[${MARK}]`)) {
+          const wrap = button.closest(".ganyu-img-wrap");
+          const owner = wrap ?? button.previousElementSibling;
+          const anchorAlive = owner !== null && owner.isConnected
+            && (wrap === null || wrap.querySelector("img, a") !== null);
+          if (!anchorAlive) {
+            button.remove();
+            if (wrap !== null && wrap.querySelector("img, a") === null) wrap.remove();
+          }
+        }
+      };
+
+      const ensure = () => {
+        refreshStored();
+        sweepOrphans();
+        for (const target of collectTargets()) {
+          const { host, path } = target;
+          const anchorEl = target.anchor ?? host;
+          const existing = findExisting(anchorEl, host, path);
+
+          if (existing !== null) {
+            paint(existing, path);
+            continue;
+          }
+
+          const button = doc.createElement("button");
+          button.type = "button";
+          button.setAttribute(MARK, "");
+          button.setAttribute("data-ganyu-path", path);
+          button.setAttribute("data-ganyu-kind", target.kind);
+          button.className = `ganyu-card-mark ganyu-card-mark--${target.kind}`;
+          button.setAttribute("aria-label", `收录或取消 ${basenameOf(path)}`);
+
+          const glyph = doc.createElement("span");
+          glyph.className = "ganyu-card-mark__glyph";
+          glyph.textContent = "❄";
+          button.appendChild(glyph);
+
+          const words = doc.createElement("span");
+          words.className = "ganyu-card-mark__label";
+          button.appendChild(words);
+
+          button.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Write the store HERE rather than relying on an event listener.
+            // The shelf only mounts inside the conversation header; on the
+            // welcome screen (or before the header renders) nobody listened to
+            // `ganyu:unmark`, so un-collecting silently did nothing.
+            const current = readMarks();
+            const stored = current.marks.some((mark) => mark.path === path);
+
+            const next = stored
+              ? {
+                  groups: current.groups,
+                  marks: current.marks.filter((mark) => mark.path !== path)
+                }
+              : {
+                  groups: current.groups.some((group) => group.name === DEFAULT_GROUP)
+                    ? current.groups
+                    : [{ name: DEFAULT_GROUP, at: Date.now() }, ...current.groups],
+                  marks: [
+                    {
+                      path,
+                      label: basenameOf(path),
+                      group: DEFAULT_GROUP,
+                      at: Date.now(),
+                      from: currentConversationTitle()
+                    },
+                    ...current.marks
+                  ]
+                };
+
+            if (writeMarks(next)) {
+              // Rebuild the Set BEFORE painting: `paint` reads it, and it is only
+              // refreshed inside ensure()/repaintAll(), so without this the pill
+              // repainted from a stale snapshot and never flipped to 已收.
+              refreshStored();
+              window.dispatchEvent(new CustomEvent("ganyu:marks-changed"));
+              paint(button, path);
+            }
+          });
+
+          quiet(() => {
+            if (target.kind === "presented") {
+              const actions = [...host.children].find((child) =>
+                child.className !== undefined
+                && String(child.className).indexOf("K5rwea_actions") >= 0
+              );
+              if (actions !== undefined && actions.parentElement === host) {
+                host.insertBefore(button, actions);
+              } else {
+                host.appendChild(button);
+              }
+            } else if (target.kind === "link") {
+              // Sit right after the link itself. Appending to the paragraph put
+              // the button at the END of the line, far from the link text.
+              const anchorEl = target.anchor ?? host;
+              anchorEl.insertAdjacentElement("afterend", button);
+            } else if (target.kind === "image") {
+              // Place the pill immediately beside the picture, and NOT inside the
+              // element that opens the zoom viewer.
+              //
+              // The shell wraps a message image in a clickable node (button, or a
+              // div with role=button / cursor:pointer) that opens a lightbox. Two
+              // mistakes are easy here:
+              //   * putting the pill INSIDE that node  -> hover over the strip
+              //     under the picture still zooms;
+              //   * climbing past it into an ancestor  -> the pill lands inside the
+              //     lightbox overlay, which made the preview janky and hid it.
+              // So: step out of the clickable node ONCE, and stop at the first
+              // sibling container instead of walking to the top.
+              const img = target.anchor;
+              if (img === undefined || img === null) {
+                host.appendChild(button);
+              } else {
+                const isZoomHost = (node) => {
+                  if (node === null) return false;
+                  if (node.tagName === "BUTTON" || node.tagName === "A") return true;
+                  const role = node.getAttribute?.("role");
+                  if (role === "button" || role === "link") return true;
+                  try {
+                    const cursor = getComputedStyle(node).cursor;
+                    return cursor === "pointer" || cursor === "zoom-in";
+                  } catch {
+                    return false;
+                  }
+                };
+
+                // One step out of the first clickable wrapper, no further, then
+                // WRAP that wrapper together with the pill so they stay adjacent.
+                // Inserting as a plain sibling left the pill at the end of the
+                // row, far from the picture.
+                let anchorEl = img;
+                if (img.parentElement !== null && isZoomHost(img.parentElement)) {
+                  anchorEl = img.parentElement;
+                }
+
+                const outer = anchorEl.parentElement;
+                if (outer !== null) {
+                  const wrap = doc.createElement("span");
+                  wrap.className = "ganyu-img-wrap";
+                  outer.insertBefore(wrap, anchorEl);
+                  wrap.appendChild(anchorEl);
+                  wrap.appendChild(button);
+                  mountedFor.set(anchorEl, button);
+
+                  // Size the wrapper to the PICTURE, measured, not inherited.
+                  //
+                  // The shell gives message images an explicit max-width and a
+                  // parent that is wider than the bitmap, so `fit-content` still
+                  // resolved to the parent width and left a dead strip beside a
+                  // letterboxed picture. Writing the measured bitmap box onto the
+                  // wrapper guarantees the pill lands against the pixels.
+                  // Measure once and write only when the value actually changes.
+                  // An unconditional write fed the ResizeObserver below, which
+                  // measured again — a read/write loop on every box change.
+                  let lastW = -1;
+                  let lastH = -1;
+                  const sizeToPicture = () => {
+                    const bitmap = anchorEl.tagName === "IMG"
+                      ? anchorEl
+                      : anchorEl.querySelector("img");
+                    if (bitmap === null) return;
+                    const box = bitmap.getBoundingClientRect();
+                    if (box.width <= 0 || box.height <= 0) return;
+                    const w = Math.round(box.width);
+                    const h = Math.round(box.height);
+                    if (w === lastW && h === lastH) return; // nothing changed: no write
+                    lastW = w;
+                    lastH = h;
+                    wrap.style.width = `${w}px`;
+                    wrap.style.height = `${h}px`;
+                    anchorEl.style.width = `${w}px`;
+                    anchorEl.style.height = `${h}px`;
+                  };
+
+                  sizeToPicture();
+                  // A lazy image reports 0×0 before decode; retry once it loads.
+                  const bitmap = anchorEl.tagName === "IMG" ? anchorEl : anchorEl.querySelector("img");
+                  if (bitmap !== null && bitmap.complete !== true) {
+                    bitmap.addEventListener("load", () => sizeToPicture(), { once: true });
+                  }
+                } else {
+                  host.appendChild(button);
+                  mountedFor.set(anchorEl, button);
+                }
+              }
+            } else {
+              host.appendChild(button);
+            }
+            mountedFor.set(anchorEl, button);
+            paint(button, path);
+          });
+        }
+      };
+
+      ensure();
+
+      const onChanged = () => repaintAll();
+      const onStorage = (event) => {
+        if (event.key === MARK_KEY) repaintAll();
+      };
+      window.addEventListener("ganyu:marks-changed", onChanged);
+      window.addEventListener("storage", onStorage);
+
+      // Debounced, and only rescan when the change could involve a file-ish node.
+      //
+      // `ensure()` walks the whole document. Firing it on every mutation during
+      // streaming made the page and the preview pane stutter, because the chat
+      // re-renders many times per second. A short debounce plus a cheap relevance
+      // check keeps the cost flat.
+      let pending = 0;
+      const schedule = () => {
+        if (pending !== 0) return;
+        pending = window.setTimeout(() => {
+          pending = 0;
+          ensure();
+        }, 120);
+      };
+
+      // Must list EVERY anchor kind collectTargets() looks for. A reference chip
+      // carries no href, so omitting it here meant the scan never re-ran when a
+      // markdown file mention appeared — the button simply never got created.
+      const RELEVANT = [
+        "img[src]",
+        "a[href]",
+        "[data-presented-file]",
+        "[data-message-attachments]",
+        "[data-ref-chip]",
+        "[class*='fileMention']",
+        "[class*='fileLink']",
+        "[role='link'][href]",
+        "[data-resource-address]",
+        "[data-file-path]",
+        "[data-reference]"
+      ].join(", ");
+      const looksRelevant = (mutation) => {
+        for (const node of mutation.addedNodes) {
+          if (node.nodeType !== 1) continue;
+          if (node.matches?.(RELEVANT)) return true;
+          if (node.querySelector?.(RELEVANT) !== null) return true;
+        }
+        return false;
+      };
+
+      observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (looksRelevant(mutation)) {
+            schedule();
+            return;
+          }
+        }
+      });
+      observer.observe(doc.body, { childList: true, subtree: true });
+
+      // Safety net: the observer only fires for mutations it deems relevant, and
+      // a reference chip is easy to misclassify. This low-frequency sweep makes
+      // sure a missed element still gets its button, at negligible cost because
+      // ensure() returns immediately when everything is already marked.
+      const sweep = window.setInterval(() => {
+        if (typeof document.visibilityState === "string" && document.visibilityState === "hidden") return;
+        ensure();
+      }, 4000);
+
+      return () => {
+        observer?.disconnect();
+        window.clearInterval(sweep);
+        if (pending !== 0) window.clearTimeout(pending);
+        window.removeEventListener("ganyu:marks-changed", onChanged);
+        window.removeEventListener("storage", onStorage);
+      };
+    }
+
+
     function apply(ctx) {      // Stylesheet: owned by the plugin fiber so disabling the plugin removes it.
       ctx.effect(() => {
         if (typeof document === "undefined") return;
@@ -1997,12 +4450,62 @@ window.__ModuleLoader__.load({
         }, PetIcon));
       });
 
+      // 雪泥鸿爪 lives in the session header's utilities area (top-right). The
+      // bookmark is a PATH only — nothing is copied, and opening goes through the
+      // host's openWorkspacePath, the same route the shell's "Open in..." uses.
+      // Minimal, hard dependency only. Requiring optional services here is
+      // dangerous: `ctx.inject` silently never calls the callback when ANY name
+      // is missing, which takes the whole shelf down (its button stops opening).
+      // Everything beyond these two is read opportunistically inside the shelf.
+      // Services the "open in sidebar" path needs. Declared in a SEPARATE inject
+      // so a missing one cannot take the whole shelf down: if these never become
+      // available, the panel still works and 打开 falls back to the host opener.
+      // One mutable box shared with the shelf. `apply` fills it when the
+      // optional services settle; the shelf reads it at click time.
+      const servicesHolder = { sidebarRight: undefined, sessions: undefined };
+      try {
+        ctx.inject(["sidebarRight", "sessions"], (later) => {
+          servicesHolder.sidebarRight = later.sidebarRight;
+          servicesHolder.sessions = later.sessions;
+        });
+      } catch {
+        /* optional services unavailable: sidebar opening stays off */
+      }
+
+      // The shelf is mounted by DOM, not by a slot.
+      //
+      // `conversation.session.header.utilities` does not exist in this build
+      // (only `.corner` does, and that one is already owned by the shell's own
+      // 打开右侧边栏 button). Registering into a non-existent slot meant the
+      // button simply never appeared. `[data-conversation-header-corner]` is the
+      // stable wrapper around the header's right-hand control cluster, so the
+      // shelf is inserted there as a sibling of the native buttons.
+      ctx.inject(["slots", "remote", "remote.session"], (scope) => {
+        const Marks = createMarkShelf({
+          session: scope.remote?.session ?? scope["remote.session"],
+          holder: servicesHolder
+        });
+        ctx.effect(() => mountMarksHeader(Marks), "ganyu theme: marks header mount");
+      });
+
       // Account-row Settings icon. The account trigger's own markup owns the
       // avatar and the name/phone span, and the shell exposes no programmatic
       // "open settings" call, so the icon is appended INSIDE that trigger button
       // at runtime. It is a real button with its own handler, so clicking it does
       // not just toggle the account menu.
       ctx.effect(() => mountAccountRowIcon(), "ganyu theme: account settings icon");
+
+      // ❄ on every presented-file card, so a file can be kept with one click.
+      ctx.effect(() => mountFileCardMarks(), "ganyu theme: file card marks");
+
+      // Diagnostics: `ganyuMarksDiag()` in DevTools prints what was recognised.
+      try {
+        window.ganyuMarksDiag = marksDiagnostics;
+        window.ganyuFindRef = findReferenceByText;
+        window.ganyuMarkRef = markReferenceByText;
+      } catch {
+        /* non-browser host */
+      }
     }
 
     exports.apply = apply;
